@@ -52,5 +52,21 @@ export class MissionService {
     });
     return result;
   }
-  
+  findOne(id: string, clearance: string) {
+    
+    const rawData = fs.readFileSync('data/missions.json', 'utf-8');
+    const missions: IMission[] = JSON.parse(rawData);
+    const mission = missions.find(m => m.id === id);
+
+    if (!mission) {
+      throw new NotFoundException('Mission not found');
+    }
+    const isDangerous = mission.riskLevel === 'HIGH' || mission.riskLevel === 'CRITICAL';
+    const isNotTopSecret = clearance !== 'TOP_SECRET';
+
+    if (isDangerous && isNotTopSecret) {
+      mission.targetName = '***REDACTED***';
+    }
+    return mission;
+  }
 }
